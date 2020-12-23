@@ -4,13 +4,14 @@
 /* ------------------------- ALL REQUIRED LIBRARIES ------------------------- */
 #include <algorithm>
 #include <chrono>
+#include <cstdlib>
+#include <ctime>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
+#include <math.h>
 #include <utility>
 #include <vector>
-#include <ctime>
-#include <cstdlib>
 
 using namespace std;
 
@@ -48,20 +49,38 @@ struct OptimalResult {
 OptimalResult opt_res; // optimal result (global variabla) -> it will change while iterating
 
 /* ------------------------------- FUNCTIONS ------------------------------- */
+/* It defines the probability of accepting a worsening move using Boltzmann distribution.
+Given the length of a configuration l_i, the optimal length l and a defined temperature T,
+we calculate the probability as follows: exp(-(l_i - l)/(T)) */
+double get_probability(int l_i, int l, double T)
+{
+    // Let's clarify what the following equation do: the farther l_i  is from l,
+    // the lower the probability of accepting a move (given a fixed T).
+    double probability = exp(-(l_i - l) / (T));
+    return probability;
+}
+
+/* It return the new updated temperature after each iteration using a geometric law
+of parameter alpha defined for us, computing the following: T_{k+1} = alpha * T_{k},
+where T_{k} is a function of the current temperature with the iteration counter k.*/
+void update_temperature(double& T_k, double alpha)
+{
+    T_k *= alpha;
+}
 
 /* Given a solution (vector of pieces), returns another solution belonging to its
 neighborhood. A vector of pieces s' is considered a neighbour of s if either swapping
 two pieces of the vector or inverting the position of one, s' = s.
 */
 vector<Roll> random_neighbour(const vector<Roll>& initial_solution)
-{   
+{
     vector<Roll> neighbour_solution = initial_solution;
-    srand((unsigned) time(0));
-    
+    srand((unsigned)time(0));
+
     // two random numbers between 0 and the number of pieces
     int pos1 = rand() % (initial_solution.size());
     int pos2 = rand() % (initial_solution.size());
-    
+
     // if the two random numbers are equal, we just invert the coordinates
     // of the roll situated in that position
     if (pos1 == pos2) {
@@ -77,9 +96,10 @@ vector<Roll> random_neighbour(const vector<Roll>& initial_solution)
     return neighbour_solution;
 }
 
-void print_solution(const vector<Roll>& s) 
+void print_solution(const vector<Roll>& s)
 {
-    for (auto roll : s) cout << roll.p << " " << roll.q << endl;
+    for (auto roll : s)
+        cout << roll.p << " " << roll.q << endl;
 }
 
 /* Given a boolean matrix B and 4 integers representing the dimensions
@@ -100,7 +120,7 @@ bool legal(const UsedCanvas& B, int p, int q, int i, int j)
     return true; // We can place the piece!
 }
 
-/* Given a vector of rolls and a length, returns a solution in the output's format: a length L 
+/* Given a vector of rolls and a length, returns a solution in the output's format: a length L
 and a vector of coordinates representing the top-left and the low-right cell occupied for every
 piece. */
 OptimalResult get_solution(const vector<Roll>& rolls, int max_length)
@@ -108,12 +128,12 @@ OptimalResult get_solution(const vector<Roll>& rolls, int max_length)
     UsedCanvas B(max_length, vector<bool>(W, false)); // worst case -> dimension "max_length x W"
     Coordinates coord(N); // will be filled by the coordinates of our output
     int l = 0; // length at the beginning
-    bool placed;// will became true when a piece is placed
+    bool placed; // will became true when a piece is placed
     // coordinates i and j to know where has been placed the last piece
     int coord_i = 0;
     int coord_j = 0;
 
-    for (int idx = 0; idx < rolls.size(); ++ idx) {
+    for (int idx = 0; idx < rolls.size(); ++idx) {
         placed = false;
         while (not placed) {
             // the roll doesn't have enought space on this row
@@ -127,12 +147,10 @@ OptimalResult get_solution(const vector<Roll>& rolls, int max_length)
                 if (coord_j == W - 1) {
                     ++coord_i;
                     coord_j = 0;
-                }
-                else {
+                } else {
                     ++coord_j;
                 }
-            }
-            else {
+            } else {
                 // check if all the cells that will occupy the roll are available
                 if (legal(B, rolls[idx].p, rolls[idx].q, coord_i, coord_j)) {
                     for (int i = 0; i < rolls[idx].q; ++i) {
@@ -142,20 +160,19 @@ OptimalResult get_solution(const vector<Roll>& rolls, int max_length)
                     }
                     l = max(l, coord_i + rolls[idx].q);
                     placed = true;
-                    coord[idx].l = {coord_i, coord_j};
-                    coord[idx].r = {coord_i + rolls[idx].q - 1, coord_j + rolls[idx].p - 1};
+                    coord[idx].l = { coord_i, coord_j };
+                    coord[idx].r = { coord_i + rolls[idx].q - 1, coord_j + rolls[idx].p - 1 };
 
                     // the coordinates are set to the top-right corner of the placed roll
                     coord_j = coord_j + rolls[idx].p - 1;
-                }
-                else {
+                } else {
                     ++coord_j;
-                } 
+                }
             }
         }
     }
 
-    return {l, coord};
+    return { l, coord };
 }
 
 int main(int argc, char* argv[])
@@ -187,9 +204,7 @@ int main(int argc, char* argv[])
     cout << s1.L << endl;
     for (int c = 0; c < int(s1.coord.size()); ++c) {
         cout << s1.coord[c].l.first << " " << s1.coord[c].l.second << "   ";
-        cout<< s1.coord[c].r.first << " " << s1.coord[c].r.second << endl;
+        cout << s1.coord[c].r.first << " " << s1.coord[c].r.second << endl;
     }
     cout << endl;
-
-
 }
