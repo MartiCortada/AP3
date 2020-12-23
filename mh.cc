@@ -48,11 +48,39 @@ struct OptimalResult {
 
 OptimalResult opt_res; // optimal result (global variabla) -> it will change while iterating
 
+vector<Roll> opt_s;
+
+int T = 1000;
+
 /* ------------------------------- FUNCTIONS ------------------------------- */
+/* Given a vector of coordinates coord and the length L of our output configuration,
+it prints the solution in the way we are asked (whose correctnes will be checked
+with an alternative program) and sends it in a file called output */
+void write_output(string output, const Coordinates& coord, int L)
+{
+    // duration time manipulation
+    auto end = Time::now(); // variable used for computing the time til we reach the solution
+    fsec duration = end - start;
+
+    // writing on the output file
+    ofstream file;
+    file.setf(ios::fixed);
+    file.precision(1);
+    file.open(output);
+    file << duration.count() << endl;
+    file << L << endl;
+    for (int c = 0; c < int(coord.size()); ++c) {
+        file << coord[c].l.second << " " << coord[c].l.first << "   ";
+        file << coord[c].r.second << " " << coord[c].r.first << endl;
+    }
+    file << endl;
+    file.close();
+}
+
 /* It defines the probability of accepting a worsening move using Boltzmann distribution.
 Given the length of a configuration l_i, the optimal length l and a defined temperature T,
 we calculate the probability as follows: exp(-(l_i - l)/(T)) */
-double get_probability(int l_i, int l, double T)
+double get_probability(int l_i, int l)
 {
     // Let's clarify what the following equation do: the farther l_i  is from l,
     // the lower the probability of accepting a move (given a fixed T).
@@ -63,9 +91,10 @@ double get_probability(int l_i, int l, double T)
 /* It return the new updated temperature after each iteration using a geometric law
 of parameter alpha defined for us, computing the following: T_{k+1} = alpha * T_{k},
 where T_{k} is a function of the current temperature with the iteration counter k.*/
-void update_temperature(double& T_k, double alpha)
-{
-    T_k *= alpha;
+void update_temperature()
+{   
+    double alpha = 0.999;
+    T *= alpha;
 }
 
 /* Given a solution (vector of pieces), returns another solution belonging to its
@@ -77,18 +106,18 @@ vector<Roll> random_neighbour(const vector<Roll>& initial_solution)
     vector<Roll> neighbour_solution = initial_solution;
     srand((unsigned)time(0));
 
-    // two random numbers between 0 and the number of pieces
-    int pos1 = rand() % (initial_solution.size());
-    int pos2 = rand() % (initial_solution.size());
 
-    // if the two random numbers are equal, we just invert the coordinates
-    // of the roll situated in that position
-    if (pos1 == pos2) {
-        neighbour_solution[pos1].p = initial_solution[pos1].q;
-        neighbour_solution[pos1].q = initial_solution[pos1].p;
+    // nvert the coordinates of the roll situated in that position
+    if (rand() % 2) {
+        int pos = rand() % (initial_solution.size());
+        neighbour_solution[pos].p = initial_solution[pos].q;
+        neighbour_solution[pos].q = initial_solution[pos].p;
     }
     // we swap the rolls situated in the positions of the random numbers
     else {
+        // two random numbers between 0 and the number of pieces
+        int pos1 = rand() % (initial_solution.size());
+        int pos2 = rand() % (initial_solution.size());
         neighbour_solution[pos1] = initial_solution[pos2];
         neighbour_solution[pos2] = initial_solution[pos1];
     }
@@ -175,6 +204,32 @@ OptimalResult get_solution(const vector<Roll>& rolls, int max_length)
     return { l, coord };
 }
 
+void simulated_annealing(string output, int max_length)
+{
+    int k = 0;
+    while (T > 0.0005) {
+        vector<Roll> s1 = random_neighbour(opt_s);
+        OptimalResult S1 = get_solution(s1, max_length);
+
+        if (S1.L < opt_res.L) {
+            opt_res = S1;
+            write_output(output, opt_res.coord, opt_res.L);
+        }
+        else {
+            double prob = get_probability(S1.L, opt_res.L);
+
+            if (((double) rand() / (RAND_MAX)) <= prob) {
+                opt_res = S1;
+                write_output(output, opt_res.coord, opt_res.L);
+            }
+        }
+
+        update_temperature();
+        ++k;
+    }
+    cout << k << endl;
+}
+
 int main(int argc, char* argv[])
 {
     // read input from a file
@@ -199,12 +254,8 @@ int main(int argc, char* argv[])
     ++max_length;
     opt_res.L = max_length; // max_length at the beginning (worst case)
 
-    OptimalResult s1 = get_solution(initial_solution, max_length);
+    opt_res = get_solution(initial_solution, max_length);
+    opt_s = initial_solution;
 
-    cout << s1.L << endl;
-    for (int c = 0; c < int(s1.coord.size()); ++c) {
-        cout << s1.coord[c].l.first << " " << s1.coord[c].l.second << "   ";
-        cout << s1.coord[c].r.first << " " << s1.coord[c].r.second << endl;
-    }
-    cout << endl;
+    simulated_annealing(argv[2], max_length);
 }
