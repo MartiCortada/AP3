@@ -100,24 +100,30 @@ bool legal(const UsedCanvas& B, int p, int q, int i, int j)
     return true; // We can place the piece!
 }
 
-
+/* Given a vector of rolls and a length, returns a solution in the output's format: a length L 
+and a vector of coordinates representing the top-left and the low-right cell occupied for every
+piece. */
 OptimalResult get_solution(const vector<Roll>& rolls, int max_length)
 {
     UsedCanvas B(max_length, vector<bool>(W, false)); // worst case -> dimension "max_length x W"
     Coordinates coord(N); // will be filled by the coordinates of our output
     int l = 0; // length at the beginning
     bool placed;// will became true when a piece is placed
+    // coordinates i and j to know where has been placed the last piece
     int coord_i = 0;
     int coord_j = 0;
 
     for (int idx = 0; idx < rolls.size(); ++ idx) {
         placed = false;
         while (not placed) {
+            // the roll doesn't have enought space on this row
             if (W - coord_j < rolls[idx].p) {
                 ++coord_i;
                 coord_j = 0;
             }
+            // the current cell is already occupied
             else if (B[coord_i][coord_j]) {
+                // if it's the last cell of the row, we jump into the next one
                 if (coord_j == W - 1) {
                     ++coord_i;
                     coord_j = 0;
@@ -127,6 +133,7 @@ OptimalResult get_solution(const vector<Roll>& rolls, int max_length)
                 }
             }
             else {
+                // check if all the cells that will ocuppie the roll are available
                 if (legal(B, rolls[idx].p, rolls[idx].q, coord_i, coord_j)) {
                     for (int i = 0; i < rolls[idx].q; ++i) {
                         for (int j = 0; j < rolls[idx].p; ++j) {
@@ -137,6 +144,8 @@ OptimalResult get_solution(const vector<Roll>& rolls, int max_length)
                     placed = true;
                     coord[idx].l = {coord_i, coord_j};
                     coord[idx].r = {coord_i + rolls[idx].q - 1, coord_j + rolls[idx].p - 1};
+
+                    // the coordinates are set to the top-right corner of the placed roll
                     coord_j = coord_j + rolls[idx].p - 1;
                 }
                 else {
@@ -182,17 +191,5 @@ int main(int argc, char* argv[])
     }
     cout << endl;
 
-
-    // it will store the coordinates of every roll of the partial solutions
-    // Coordinates coord(N);
-
-    // boolean matrix that represents the canvas. The 1-cells mean that a roll has been placed there
-    // and the 0-cells mean that that position is free.
-    // It is initially defined with size W x max_length, to cover all the possible partial solutions
-    //UsedCanvas B(max_length, vector<bool>(W, false));
-
-    // it stores the coordinates of the left-upper corner of the last roll placed in the canvas
-    //pair<int, int> current_coordinates = { 0, 0 };
-
-    //generate_canvas(argv[2], B, rolls, coord, current_coordinates, 0, 0);
+    
 }
