@@ -9,6 +9,8 @@
 #include <iostream>
 #include <utility>
 #include <vector>
+#include <ctime>
+#include <cstdlib>
 
 using namespace std;
 
@@ -46,6 +48,41 @@ struct OptimalResult {
 OptimalResult opt_res; // optimal result (global variabla) -> it will change while iterating
 
 /* ------------------------------- FUNCTIONS ------------------------------- */
+
+/* Given a solution (vector of pieces), returns another solution belonging to its
+neighborhood. A vector of pieces s' is considered a neighbour of s if either swapping
+two pieces of the vector or inverting the position of one, s' = s.
+*/
+vector<Roll> random_neighbour(const vector<Roll>& initial_solution)
+{   
+    vector<Roll> neighbour_solution = initial_solution;
+    srand((unsigned) time(0));
+    
+    // two random numbers between 0 and the number of pieces
+    int pos1 = rand() % (initial_solution.size());
+    int pos2 = rand() % (initial_solution.size());
+    cout << pos1 << " " << pos2 << endl << endl;
+    
+    // if the two random numbers are equal, we just invert the coordinates
+    // of the roll situated in that position
+    if (pos1 == pos2) {
+        neighbour_solution[pos1].p = initial_solution[pos1].q;
+        neighbour_solution[pos1].q = initial_solution[pos1].p;
+    }
+    // we swap the rolls situated in the positions of the random numbers
+    else {
+        neighbour_solution[pos1] = initial_solution[pos2];
+        neighbour_solution[pos2] = initial_solution[pos1];
+    }
+
+    return neighbour_solution;
+}
+
+void print_solution(const vector<Roll>& s) 
+{
+    for (auto roll : s) cout << roll.p << " " << roll.q << endl;
+}
+
 int main(int argc, char* argv[])
 {
     // read input from a file
@@ -69,6 +106,11 @@ int main(int argc, char* argv[])
     f.close();
     ++max_length;
     opt_res.L = max_length; // max_length at the beginning (worst case)
+
+    vector<Roll> neighbour = random_neighbour(initial_solution);
+    print_solution(initial_solution);
+    cout << endl;
+    print_solution(neighbour);
 
     // it will store the coordinates of every roll of the partial solutions
     // Coordinates coord(N);
