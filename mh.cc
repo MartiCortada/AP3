@@ -50,7 +50,7 @@ OptimalResult opt_res; // optimal result (global variabla) -> it will change whi
 
 vector<Roll> opt_s;
 
-int T = 1000;
+double T = 50;
 
 /* ------------------------------- FUNCTIONS ------------------------------- */
 /* Given a vector of coordinates coord and the length L of our output configuration,
@@ -84,7 +84,7 @@ double get_probability(int l_i, int l)
 {
     // Let's clarify what the following equation do: the farther l_i  is from l,
     // the lower the probability of accepting a move (given a fixed T).
-    double probability = exp(-(l_i - l) / (T));
+    double probability = exp((l_i - l) / (T));
     return probability;
 }
 
@@ -93,7 +93,7 @@ of parameter alpha defined for us, computing the following: T_{k+1} = alpha * T_
 where T_{k} is a function of the current temperature with the iteration counter k.*/
 void update_temperature()
 {   
-    double alpha = 0.999;
+    double alpha = 0.99;
     T *= alpha;
 }
 
@@ -207,7 +207,7 @@ OptimalResult get_solution(const vector<Roll>& rolls, int max_length)
 void simulated_annealing(string output, int max_length)
 {
     int k = 0;
-    while (T > 0.0005) {
+    while (T > 0.00001) { // almost 0
         vector<Roll> s1 = random_neighbour(opt_s);
         OptimalResult S1 = get_solution(s1, max_length);
 
@@ -217,6 +217,7 @@ void simulated_annealing(string output, int max_length)
         }
         else {
             double prob = get_probability(S1.L, opt_res.L);
+            cout << prob << endl;
 
             if (((double) rand() / (RAND_MAX)) <= prob) {
                 opt_res = S1;
@@ -225,6 +226,7 @@ void simulated_annealing(string output, int max_length)
         }
 
         update_temperature();
+        cout << T << endl;
         ++k;
     }
     cout << k << endl;
