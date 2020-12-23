@@ -90,7 +90,7 @@ bool legal(const UsedCanvas& B, int p, int q, int i, int j)
     if (j + p > W or B[i][j])
         return false; // if it is already filled or exceeds the matrix dimensions
     // if B[i][j] == false, which means that place is not filled, then iterate
-    // for all position that would ocupate the peace and check whether it's empty or not
+    // for all position that would occupy the peace and check whether it's empty or not
     for (int r = i; r < i + q; ++r) {
         for (int s = j; s < j + p; ++s) {
             if (B[r][s])
@@ -133,7 +133,7 @@ OptimalResult get_solution(const vector<Roll>& rolls, int max_length)
                 }
             }
             else {
-                // check if all the cells that will ocuppie the roll are available
+                // check if all the cells that will occupy the roll are available
                 if (legal(B, rolls[idx].p, rolls[idx].q, coord_i, coord_j)) {
                     for (int i = 0; i < rolls[idx].q; ++i) {
                         for (int j = 0; j < rolls[idx].p; ++j) {
@@ -191,5 +191,5 @@ int main(int argc, char* argv[])
     }
     cout << endl;
 
-    
+
 }
