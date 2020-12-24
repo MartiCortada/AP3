@@ -50,7 +50,7 @@ OptimalResult opt_res; // optimal result (global variabla) -> it will change whi
 
 vector<Roll> opt_s;
 
-double T = 50;
+double T = 30;
 
 /* ------------------------------- FUNCTIONS ------------------------------- */
 /* Given a vector of coordinates coord and the length L of our output configuration,
@@ -82,9 +82,10 @@ Given the length of a configuration l_i, the optimal length l and a defined temp
 we calculate the probability as follows: exp(-(l_i - l)/(T)) */
 double get_probability(int l_i, int l)
 {
+    if (l_i == l) ++l_i;
     // Let's clarify what the following equation do: the farther l_i  is from l,
     // the lower the probability of accepting a move (given a fixed T).
-    double probability = exp((l_i - l) / (T));
+    double probability = exp(-(l_i - l) / (T));
     return probability;
 }
 
@@ -104,10 +105,8 @@ two pieces of the vector or inverting the position of one, s' = s.
 vector<Roll> random_neighbour(const vector<Roll>& initial_solution)
 {
     vector<Roll> neighbour_solution = initial_solution;
-    srand((unsigned)time(0));
 
-
-    // nvert the coordinates of the roll situated in that position
+    // invert the coordinates of the roll situated in that position
     if (rand() % 2) {
         int pos = rand() % (initial_solution.size());
         neighbour_solution[pos].p = initial_solution[pos].q;
@@ -207,9 +206,10 @@ OptimalResult get_solution(const vector<Roll>& rolls, int max_length)
 void simulated_annealing(string output, int max_length)
 {
     int k = 0;
-    while (T > 0.00001) { // almost 0
+    while (T > 0.01) { // almost 0
         vector<Roll> s1 = random_neighbour(opt_s);
         OptimalResult S1 = get_solution(s1, max_length);
+         cout << "Kklk" << endl;
 
         if (S1.L < opt_res.L) {
             opt_res = S1;
@@ -217,7 +217,7 @@ void simulated_annealing(string output, int max_length)
         }
         else {
             double prob = get_probability(S1.L, opt_res.L);
-            cout << prob << endl;
+            cout << "prob: " << prob << endl;
 
             if (((double) rand() / (RAND_MAX)) <= prob) {
                 opt_res = S1;
@@ -226,10 +226,10 @@ void simulated_annealing(string output, int max_length)
         }
 
         update_temperature();
-        cout << T << endl;
+        cout << "T: " << T << endl;
+        cout << "k: "<< k << endl;
         ++k;
     }
-    cout << k << endl;
 }
 
 int main(int argc, char* argv[])
@@ -258,6 +258,8 @@ int main(int argc, char* argv[])
 
     opt_res = get_solution(initial_solution, max_length);
     opt_s = initial_solution;
+
+    srand(time(NULL));
 
     simulated_annealing(argv[2], max_length);
 }
