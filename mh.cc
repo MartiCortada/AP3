@@ -290,7 +290,7 @@ int main(int argc, char* argv[])
     ++max_length;
     opt_res.L = max_length; // max_length at the beginning (worst case)
 
-    srand((unsigned)time(0)); // each time the random selection will be different!
+    srand(time(NULL)); // each time the random selection will be different!
     vector<Roll> initial_solution = generate_initial_solution(rolls);
 
     // DEBUGGING: to check if it generates randomly the initial solution -> WORKS!!!
@@ -299,8 +299,6 @@ int main(int argc, char* argv[])
 
     opt_res = get_solution(initial_solution, max_length);
     opt_s = initial_solution;
-
-    srand(time(NULL));
 
     simulated_annealing(argv[2], max_length);
 }
