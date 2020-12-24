@@ -82,7 +82,8 @@ Given the length of a configuration l_i, the optimal length l and a defined temp
 we calculate the probability as follows: exp(-(l_i - l)/(T)) */
 double get_probability(int l_i, int l)
 {
-    if (l_i == l) ++l_i;
+    if (l_i == l)
+        ++l_i;
     // Let's clarify what the following equation do: the farther l_i  is from l,
     // the lower the probability of accepting a move (given a fixed T).
     double probability = exp(-(l_i - l) / (T));
@@ -93,7 +94,7 @@ double get_probability(int l_i, int l)
 of parameter alpha defined for us, computing the following: T_{k+1} = alpha * T_{k},
 where T_{k} is a function of the current temperature with the iteration counter k.*/
 void update_temperature()
-{   
+{
     double alpha = 0.99;
     T *= alpha;
 }
@@ -161,7 +162,7 @@ OptimalResult get_solution(const vector<Roll>& rolls, int max_length)
     int coord_i = 0;
     int coord_j = 0;
 
-    for (int idx = 0; idx < rolls.size(); ++idx) {
+    for (int idx = 0; idx < int(rolls.size()); ++idx) {
         placed = false;
         while (not placed) {
             // the roll doesn't have enought space on this row
@@ -209,17 +210,16 @@ void simulated_annealing(string output, int max_length)
     while (T > 0.01) { // almost 0
         vector<Roll> s1 = random_neighbour(opt_s);
         OptimalResult S1 = get_solution(s1, max_length);
-         cout << "Kklk" << endl;
+        cout << "Kklk" << endl;
 
         if (S1.L < opt_res.L) {
             opt_res = S1;
             write_output(output, opt_res.coord, opt_res.L);
-        }
-        else {
+        } else {
             double prob = get_probability(S1.L, opt_res.L);
             cout << "prob: " << prob << endl;
 
-            if (((double) rand() / (RAND_MAX)) <= prob) {
+            if (((double)rand() / (RAND_MAX)) <= prob) {
                 opt_res = S1;
                 write_output(output, opt_res.coord, opt_res.L);
             }
@@ -227,9 +227,43 @@ void simulated_annealing(string output, int max_length)
 
         update_temperature();
         cout << "T: " << T << endl;
-        cout << "k: "<< k << endl;
+        cout << "k: " << k << endl;
         ++k;
     }
+}
+
+/* It generates an initiall solution randomly as follows: first select randomly
+which piece will be placed first and then (again randomly) if we store it with the
+dimensions p x q or q x p, and so on and so forth. */
+vector<Roll> generate_initial_solution(vector<Roll>& rolls)
+{
+    vector<Roll> initial_solution(int(rolls.size()) - 1);
+
+    // select randomly which piece we choose at each step
+    int idx;
+    int idx1 = 0;
+    for (int i = int(rolls.size()) - 1; i > 0; --i) {
+        idx = (rand() % i) + 1; // random value in [0, ..., i]
+        initial_solution[idx1] = rolls[idx];
+        rolls[idx] = rolls[int(rolls.size()) - 1];
+        rolls.pop_back();
+        ++idx1;
+    }
+    initial_solution[idx1] = rolls[0];
+
+    // select randomly, for each position, if we place the piece as p x q or q x p
+    int p, q;
+    for (int i = 0; i < int(initial_solution.size()); ++i) {
+        idx = ((rand() % 1) + 1); // 0 o 1 with prob 1/2: if 0 we get p x q, if 1 we get q x p
+        if (idx == 1) { // we change p x q -> q x p
+            q = initial_solution[i].q;
+            p = initial_solution[i].p;
+            initial_solution[i].p = q;
+            initial_solution[i].q = p;
+        }
+    }
+
+    return initial_solution;
 }
 
 int main(int argc, char* argv[])
@@ -238,7 +272,7 @@ int main(int argc, char* argv[])
     ifstream f(argv[1]);
     f >> W >> N;
 
-    vector<Roll> initial_solution; // data structure that stores our initial configuration
+    vector<Roll> rolls; // data structure that stores our initial configuration
     int N_copy = N; // careful! We do not want to change N since it is global variable!
     int n, p, q; // n = number of orders of a specific type of dimensions "p x q"
     int max_length; // the L of the worst possible combination, used to define the lenght of
@@ -248,13 +282,20 @@ int main(int argc, char* argv[])
     while (N_copy > 0) {
         f >> n >> p >> q;
         for (int i = 0; i < n; ++i)
-            initial_solution.push_back({ p, q });
+            rolls.push_back({ p, q });
         max_length += n * max(p, q);
         N_copy -= n;
     }
     f.close();
     ++max_length;
     opt_res.L = max_length; // max_length at the beginning (worst case)
+
+    srand((unsigned)time(0)); // each time the random selection will be different!
+    vector<Roll> initial_solution = generate_initial_solution(rolls);
+
+    // DEBUGGING: to check if it generates randomly the initial solution -> WORKS!!!
+    for (int i = 0; i < int(initial_solution.size()); ++i)
+        cout << initial_solution[i].p << " " << initial_solution[i].q << endl;
 
     opt_res = get_solution(initial_solution, max_length);
     opt_s = initial_solution;
