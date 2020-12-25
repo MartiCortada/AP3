@@ -130,7 +130,6 @@ vector<Roll> random_neighbour(const vector<Roll>& initial_solution)
     return neighbour_solution;
 }
 
-
 /* Given a boolean matrix B and 4 integers representing the dimensions
 of a piece "p x q" and the positions of the matrix (i,j), returs whether it is
 possible or not to place that piece in the matrix. */
