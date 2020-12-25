@@ -50,7 +50,7 @@ OptimalResult opt_res; // optimal result (global variabla) -> it will change whi
 
 vector<Roll> opt_s;
 
-double T = 30;
+double T = 1000;
 
 /* ------------------------------- FUNCTIONS ------------------------------- */
 /* Given a vector of coordinates coord and the length L of our output configuration,
@@ -95,7 +95,7 @@ of parameter alpha defined for us, computing the following: T_{k+1} = alpha * T_
 where T_{k} is a function of the current temperature with the iteration counter k.*/
 void update_temperature()
 {
-    double alpha = 0.99;
+    double alpha = 0.999;
     T *= alpha;
 }
 
@@ -125,12 +125,6 @@ vector<Roll> random_neighbour(const vector<Roll>& initial_solution)
     }
 
     return neighbour_solution;
-}
-
-void print_solution(const vector<Roll>& s)
-{
-    for (auto roll : s)
-        cout << roll.p << " " << roll.q << endl;
 }
 
 /* Given a boolean matrix B and 4 integers representing the dimensions
@@ -209,7 +203,7 @@ OptimalResult get_solution(const vector<Roll>& rolls, int max_length)
 void simulated_annealing(string output, int max_length)
 {
     int k = 0;
-    while (T > 0.01) { // almost 0
+    while (T > 0.001) { // almost 0
         vector<Roll> s1 = random_neighbour(opt_s);
         OptimalResult S1 = get_solution(s1, max_length);
 
@@ -218,7 +212,6 @@ void simulated_annealing(string output, int max_length)
             write_output(output, opt_res.coord, opt_res.L);
         } else {
             double prob = get_probability(S1.L, opt_res.L);
-            //cout << "prob: " << prob << endl;
 
             if (((double)rand() / (RAND_MAX)) <= prob) {
                 opt_res = S1;
@@ -227,8 +220,6 @@ void simulated_annealing(string output, int max_length)
         }
 
         update_temperature();
-        //cout << "T: " << T << endl;
-        //cout << "k: " << k << endl;
         ++k;
     }
 }
@@ -295,10 +286,6 @@ int main(int argc, char* argv[])
 
     srand(time(NULL)); // each time the random selection will be different!
     vector<Roll> initial_solution = generate_initial_solution(rolls);
-
-    // DEBUGGING: to check if it generates randomly the initial solution -> WORKS!!!
-    //for (int i = 0; i < int(initial_solution.size()); ++i)
-    //   cout << initial_solution[i].p << " " << initial_solution[i].q << endl;
 
     opt_res = get_solution(initial_solution, max_length);
     opt_s = initial_solution;
