@@ -1,4 +1,4 @@
-/* ----------------------------- METAHEURISTIC ----------------------------- */
+/* ------------------- METAHEURISTIC: SIMULATED ANNEALING ------------------- */
 // AUTHORS: Jofre Poch Soler, Martí Cortada Garcia
 
 /* ------------------------- ALL REQUIRED LIBRARIES ------------------------- */
@@ -46,11 +46,11 @@ struct OptimalResult {
     Coordinates coord; // optimal vector of coordinates
 };
 
-OptimalResult opt_res; // optimal result (global variabla) -> it will change while iterating
+OptimalResult opt_res; // optimal result
 
-vector<Roll> opt_s;
+vector<Roll> opt_s; // it will store our initial solution
 
-double T = 1000;
+double T = 1000; // Temperature parameter (useful for simulated annealing)
 
 /* ------------------------------- FUNCTIONS ------------------------------- */
 /* Given a vector of coordinates coord and the length L of our output configuration,
@@ -84,15 +84,15 @@ double get_probability(int l_i, int l)
 {
     if (l_i == l)
         ++l_i;
-    // Let's clarify what the following equation do: the farther l_i  is from l,
+    // Let's clarify what the following equation defines: the farther l_i  is from l,
     // the lower the probability of accepting a move (given a fixed T).
     double probability = exp(-(l_i - l) / (T));
     return probability;
 }
 
 /* It return the new updated temperature after each iteration using a geometric law
-of parameter alpha defined for us, computing the following: T_{k+1} = alpha * T_{k},
-where T_{k} is a function of the current temperature with the iteration counter k.*/
+of parameter alpha (defined for us), computing the following: T_{k+1} = alpha * T_{k},
+where T_{k} is a function of the current temperature.*/
 void update_temperature()
 {
     double alpha = 0.999;
@@ -196,10 +196,11 @@ OptimalResult get_solution(const vector<Roll>& rolls, int max_length)
             }
         }
     }
-
     return { l, coord };
 }
 
+/* It performs the typical structure of a simulated annealing algorithm ...
+*/
 void simulated_annealing(string output, int max_length)
 {
     int k = 0;
@@ -260,6 +261,11 @@ vector<Roll> generate_initial_solution(vector<Roll>& rolls)
     return initial_solution;
 }
 
+/* Main loop:
+    it reads from a file all the data we need and store this data in a vector.
+    Then, we send this data on a simulated annealing (metaheuristic) algorithm
+    in order to find a solution (not necessarily the optimal)!
+*/
 int main(int argc, char* argv[])
 {
     // read input from a file
@@ -287,8 +293,8 @@ int main(int argc, char* argv[])
     srand(time(NULL)); // each time the random selection will be different!
     vector<Roll> initial_solution = generate_initial_solution(rolls);
 
-    opt_res = get_solution(initial_solution, max_length);
-    opt_s = initial_solution;
+    opt_res = get_solution(initial_solution, max_length); // optimal result
+    opt_s = initial_solution; // initial solution
 
-    simulated_annealing(argv[2], max_length);
+    simulated_annealing(argv[2], max_length); // simulated annealing algorithm
 }
