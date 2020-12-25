@@ -50,7 +50,7 @@ OptimalResult opt_res; // optimal result
 
 vector<Roll> opt_s; // it will store our initial solution
 
-double T = 1000; // Temperature parameter (useful for simulated annealing)
+double T = 10; // Temperature parameter (useful for simulated annealing)
 
 /* ------------------------------- FUNCTIONS ------------------------------- */
 /* Given a vector of coordinates coord and the length L of our output configuration,
@@ -199,12 +199,13 @@ OptimalResult get_solution(const vector<Roll>& rolls, int max_length)
     return { l, coord };
 }
 
-/* It performs the typical structure of a simulated annealing algorithm ...
-*/
+/* It performs the typical structure of a simulated annealing algorithm, updating
+a given temperatura after each iteration untill termination conditions are met.
+In other words, we try to approximatie the global optimum of a given function. */
 void simulated_annealing(string output, int max_length)
 {
     int k = 0;
-    while (T > 0.001) { // almost 0
+    while (T > 0.0001) { // almost 0
         vector<Roll> s1 = random_neighbour(opt_s);
         OptimalResult S1 = get_solution(s1, max_length);
 
