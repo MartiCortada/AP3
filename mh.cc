@@ -210,14 +210,14 @@ void simulated_annealing(string output, int max_length)
     while (T > 0.01) { // almost 0
         vector<Roll> s1 = random_neighbour(opt_s);
         OptimalResult S1 = get_solution(s1, max_length);
-        cout << "Kklk" << endl;
+        //cout << "Kklk" << endl;
 
         if (S1.L < opt_res.L) {
             opt_res = S1;
             write_output(output, opt_res.coord, opt_res.L);
         } else {
             double prob = get_probability(S1.L, opt_res.L);
-            cout << "prob: " << prob << endl;
+            //cout << "prob: " << prob << endl;
 
             if (((double)rand() / (RAND_MAX)) <= prob) {
                 opt_res = S1;
@@ -226,8 +226,8 @@ void simulated_annealing(string output, int max_length)
         }
 
         update_temperature();
-        cout << "T: " << T << endl;
-        cout << "k: " << k << endl;
+        //cout << "T: " << T << endl;
+        //cout << "k: " << k << endl;
         ++k;
     }
 }
@@ -237,7 +237,7 @@ which piece will be placed first and then (again randomly) if we store it with t
 dimensions p x q or q x p, and so on and so forth. */
 vector<Roll> generate_initial_solution(vector<Roll>& rolls)
 {
-    vector<Roll> initial_solution(int(rolls.size()) - 1);
+    vector<Roll> initial_solution(int(rolls.size()));
 
     // select randomly which piece we choose at each step
     int idx;
@@ -254,8 +254,8 @@ vector<Roll> generate_initial_solution(vector<Roll>& rolls)
     // select randomly, for each position, if we place the piece as p x q or q x p
     int p, q;
     for (int i = 0; i < int(initial_solution.size()); ++i) {
-        idx = ((rand() % 1) + 1); // 0 o 1 with prob 1/2: if 0 we get p x q, if 1 we get q x p
-        if (idx == 1) { // we change p x q -> q x p
+        // 0 o 1 with prob 1/2: if 0 we get p x q, if 1 we get q x p
+        if (rand() % 2) { // we change p x q -> q x p
             q = initial_solution[i].q;
             p = initial_solution[i].p;
             initial_solution[i].p = q;
