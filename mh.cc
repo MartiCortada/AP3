@@ -50,7 +50,7 @@ OptimalResult opt_res; // optimal result
 
 vector<Roll> opt_s; // it will store our initial solution
 
-double T = 10; // Temperature parameter (useful for simulated annealing)
+double T = 100; // Temperature parameter (useful for simulated annealing)
 
 /* ------------------------------- FUNCTIONS ------------------------------- */
 /* Given a vector of coordinates coord and the length L of our output configuration,
@@ -86,7 +86,7 @@ double get_probability(int l_i, int l)
         ++l_i;
     // Let's clarify what the following equation defines: the farther l_i  is from l,
     // the lower the probability of accepting a move (given a fixed T).
-    double probability = exp(-(l_i - l) / (T));
+    double probability = exp(-(l_i - l) / T);
     return probability;
 }
 
@@ -107,25 +107,29 @@ vector<Roll> random_neighbour(const vector<Roll>& initial_solution)
 {
     vector<Roll> neighbour_solution = initial_solution;
 
+    int pos1 = rand() % (initial_solution.size());
+    int pos2 = rand() % (initial_solution.size());
+
     // invert the coordinates of the roll situated in that position
     if (rand() % 2) {
-        int pos = rand() % (initial_solution.size());
-        if (initial_solution[pos].q <= W) {
-            neighbour_solution[pos].p = initial_solution[pos].q;
-            neighbour_solution[pos].q = initial_solution[pos].p;
+        if (initial_solution[pos1].q <= W) {
+            neighbour_solution[pos1].p = initial_solution[pos1].q;
+            neighbour_solution[pos1].q = initial_solution[pos1].p;
+        }
+        if (initial_solution[pos2].q <= W) {
+            neighbour_solution[pos2].p = initial_solution[pos2].q;
+            neighbour_solution[pos2].q = initial_solution[pos2].p;
         }
     }
     // we swap the rolls situated in the positions of the random numbers
     else {
-        // two random numbers between 0 and the number of pieces
-        int pos1 = rand() % (initial_solution.size());
-        int pos2 = rand() % (initial_solution.size());
         neighbour_solution[pos1] = initial_solution[pos2];
         neighbour_solution[pos2] = initial_solution[pos1];
     }
 
     return neighbour_solution;
 }
+
 
 /* Given a boolean matrix B and 4 integers representing the dimensions
 of a piece "p x q" and the positions of the matrix (i,j), returs whether it is

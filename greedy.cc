@@ -208,3 +208,58 @@ int main(int argc, char* argv[])
     sort(rolls.begin(), rolls.end(), criteria); // check criteria() for more information!
     greedy(argv[2], rolls, max_length); // greedy algorithm
 }
+
+
+
+
+/* Given a solution (vector of pieces), returns another solution belonging to its
+neighborhood. A vector of pieces s' is considered a neighbour of s if either swapping
+two pieces of the vector or inverting the position of one, s' = s.
+*/
+vector<Roll> random_neighbour(const vector<Roll>& initial_solution)
+{
+    vector<Roll> neighbour_solution = initial_solution;
+
+    // invert the coordinates of the roll situated in that position
+    if (rand() % 2) {
+        int pos = rand() % (initial_solution.size());
+        if (initial_solution[pos].q <= W) {
+            neighbour_solution[pos].p = initial_solution[pos].q;
+            neighbour_solution[pos].q = initial_solution[pos].p;
+        }
+    }
+    // we swap the rolls situated in the positions of the random numbers
+    else {
+        // two random numbers between 0 and the number of pieces
+        int pos1 = rand() % (initial_solution.size());
+        int pos2 = rand() % (initial_solution.size());
+        neighbour_solution[pos1] = initial_solution[pos2];
+        neighbour_solution[pos2] = initial_solution[pos1];
+    }
+
+    return neighbour_solution;
+}
+
+
+/* Given a solution (vector of pieces), returns another solution belonging to its
+neighborhood. A vector of pieces s' is considered a neighbour of s if either swapping
+two pieces of the vector or inverting the position of one, s' = s.
+*/
+vector<Roll> random_neighbour(const vector<Roll>& initial_solution)
+{
+    vector<Roll> neighbour_solution = initial_solution;
+
+    // two random numbers between 0 and the number of pieces
+    int pos1 = rand() % (initial_solution.size());
+    int pos2 = rand() % (initial_solution.size());
+    
+     if (initial_solution[pos1].q <= W) {
+        neighbour_solution[pos1].p = initial_solution[pos1].q;
+        neighbour_solution[pos1].q = initial_solution[pos1].p;
+    }
+    neighbour_solution[pos1] = initial_solution[pos2];
+    neighbour_solution[pos2] = initial_solution[pos1];
+    
+
+    return neighbour_solution;
+}
