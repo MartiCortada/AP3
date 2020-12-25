@@ -110,8 +110,10 @@ vector<Roll> random_neighbour(const vector<Roll>& initial_solution)
     // invert the coordinates of the roll situated in that position
     if (rand() % 2) {
         int pos = rand() % (initial_solution.size());
-        neighbour_solution[pos].p = initial_solution[pos].q;
-        neighbour_solution[pos].q = initial_solution[pos].p;
+        if (initial_solution[pos].q <= W) {
+            neighbour_solution[pos].p = initial_solution[pos].q;
+            neighbour_solution[pos].q = initial_solution[pos].p;
+        }
     }
     // we swap the rolls situated in the positions of the random numbers
     else {
@@ -210,7 +212,6 @@ void simulated_annealing(string output, int max_length)
     while (T > 0.01) { // almost 0
         vector<Roll> s1 = random_neighbour(opt_s);
         OptimalResult S1 = get_solution(s1, max_length);
-        //cout << "Kklk" << endl;
 
         if (S1.L < opt_res.L) {
             opt_res = S1;
@@ -256,10 +257,12 @@ vector<Roll> generate_initial_solution(vector<Roll>& rolls)
     for (int i = 0; i < int(initial_solution.size()); ++i) {
         // 0 o 1 with prob 1/2: if 0 we get p x q, if 1 we get q x p
         if (rand() % 2) { // we change p x q -> q x p
-            q = initial_solution[i].q;
-            p = initial_solution[i].p;
-            initial_solution[i].p = q;
-            initial_solution[i].q = p;
+            if (initial_solution[i].q <= W) {
+                q = initial_solution[i].q;
+                p = initial_solution[i].p;
+                initial_solution[i].p = q;
+                initial_solution[i].q = p;
+            }
         }
     }
 
@@ -294,8 +297,8 @@ int main(int argc, char* argv[])
     vector<Roll> initial_solution = generate_initial_solution(rolls);
 
     // DEBUGGING: to check if it generates randomly the initial solution -> WORKS!!!
-    for (int i = 0; i < int(initial_solution.size()); ++i)
-        cout << initial_solution[i].p << " " << initial_solution[i].q << endl;
+    //for (int i = 0; i < int(initial_solution.size()); ++i)
+    //   cout << initial_solution[i].p << " " << initial_solution[i].q << endl;
 
     opt_res = get_solution(initial_solution, max_length);
     opt_s = initial_solution;
