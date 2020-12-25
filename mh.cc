@@ -81,7 +81,9 @@ void write_output(string output, const Coordinates& coord, int L)
 Given the length of a configuration l_i, the optimal length l and a defined temperature T,
 we calculate the probability as follows: exp(-(l_i - l)/(T)) */
 double get_probability(int l_i, int l)
-{
+{   
+    // to avoid getting a probability of 1, if both lengths are equal, the lenght l_i
+    //from the neighbor is incremented one unit
     if (l_i == l)
         ++l_i;
     // Let's clarify what the following equation defines: the farther l_i  is from l,
@@ -208,7 +210,9 @@ In other words, we try to approximatie the global optimum of a given function. *
 void simulated_annealing(string output, int max_length)
 {
     int k = 0;
-    while (T > 0.0001) { // almost 0
+    double T_min = 0.0001 // terminating condition of the loop ->  when T is almost 0
+    while (T > T_min) {
+        //generate a random neighbor of the initial solution
         vector<Roll> s1 = random_neighbour(opt_s);
         OptimalResult S1 = get_solution(s1, max_length);
 
@@ -217,8 +221,10 @@ void simulated_annealing(string output, int max_length)
             write_output(output, opt_res.coord, opt_res.L);
         } else {
             double prob = get_probability(S1.L, opt_res.L);
-
-            if (((double)rand() / (RAND_MAX)) <= prob) {
+            double random_0_to_1 = ((double)rand() / (RAND_MAX));
+            // if a random number from 0 to 1 is smaller than the calculated probability,
+            // the neighbor becomes the solution
+            if (random_0_to_1 <= prob) {
                 opt_res = S1;
                 write_output(output, opt_res.coord, opt_res.L);
             }
