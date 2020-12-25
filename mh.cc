@@ -226,7 +226,7 @@ void simulated_annealing(string output, int max_length)
     }
 }
 
-/* It generates an initiall solution randomly as follows: first select randomly
+/* It generates an initial solution randomly as follows: first select randomly
 which piece will be placed first and then (again randomly) if we store it with the
 dimensions p x q or q x p, and so on and so forth. */
 vector<Roll> generate_initial_solution(vector<Roll>& rolls)
