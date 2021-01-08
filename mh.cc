@@ -210,7 +210,7 @@ In other words, we try to approximate the global optimum of a given function. */
 void simulated_annealing(string output, int max_length)
 {
     int k = 0;
-    double T_min = 0.0001; // terminating condition of the loop ->  when T is almost 0
+    double T_min = 0.0001; // terminating condition of the loop ->  when T is very close to 0
     while (T > T_min) {
         // generate a random neighbour of the initial solution
         vector<Roll> s1 = random_neighbour(opt_s);
@@ -286,7 +286,6 @@ int main(int argc, char* argv[])
     int N_copy = N; // careful! We do not want to change N since it is a global variable!
     int n, p, q; // n = number of orders of a specific type of dimensions "p x q"
     int max_length; // the L of the worst possible combination, used to define the lenght of
-        // the boolean matrix (canvas) and the first optimal lenght
 
     max_length = 0;
     while (N_copy > 0) {
