@@ -112,7 +112,7 @@ vector<Roll> random_neighbour(const vector<Roll>& initial_solution)
     int pos1 = rand() % (initial_solution.size());
     int pos2 = rand() % (initial_solution.size());
 
-    // invert the coordinates of the roll situated in that position
+    // invert the coordinates of the rolls situated in that position
     if (rand() % 2) {
         if (initial_solution[pos1].q <= W) {
             neighbour_solution[pos1].p = initial_solution[pos1].q;
@@ -205,14 +205,14 @@ OptimalResult get_solution(const vector<Roll>& rolls, int max_length)
 }
 
 /* It performs the typical structure of a simulated annealing algorithm, updating
-a given temperatura after each iteration untill termination conditions are met.
-In other words, we try to approximatie the global optimum of a given function. */
+a given temperature after each iteration untill termination conditions are met.
+In other words, we try to approximate the global optimum of a given function. */
 void simulated_annealing(string output, int max_length)
 {
     int k = 0;
     double T_min = 0.0001; // terminating condition of the loop ->  when T is almost 0
     while (T > T_min) {
-        // generate a random neighbor of the initial solution
+        // generate a random neighbour of the initial solution
         vector<Roll> s1 = random_neighbour(opt_s);
         OptimalResult S1 = get_solution(s1, max_length);
 
@@ -283,7 +283,7 @@ int main(int argc, char* argv[])
     f >> W >> N;
 
     vector<Roll> rolls; // data structure that stores our initial configuration
-    int N_copy = N; // careful! We do not want to change N since it is global variable!
+    int N_copy = N; // careful! We do not want to change N since it is a global variable!
     int n, p, q; // n = number of orders of a specific type of dimensions "p x q"
     int max_length; // the L of the worst possible combination, used to define the lenght of
         // the boolean matrix (canvas) and the first optimal lenght
